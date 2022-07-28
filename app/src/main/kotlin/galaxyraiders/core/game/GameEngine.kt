@@ -94,10 +94,12 @@ class GameEngine(
 
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
 
-        if (
+        val explosionShouldHappen = (
           first.symbol == '^' && second.symbol == '.' ||
-          first.symbol == '.' && second.symbol == '^'
-        ) {
+            first.symbol == '.' && second.symbol == '^'
+          )
+
+        if (explosionShouldHappen) {
           this.field.generateExplosion(first, second)
         }
       }

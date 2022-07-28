@@ -184,7 +184,7 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
 
     val auxiliaryVector = (
       secondCenter.toVector() - firstCenter.toVector()
-    ).unit * firstColider.radius
+      ).unit * firstColider.radius
 
     return firstCenter + auxiliaryVector
   }
@@ -195,7 +195,7 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   ): Double {
     val delta = (
       SpaceFieldConfig.explosionMaxRadius - SpaceFieldConfig.explosionMinRadius
-    )
+      )
 
     val asteroidMinMass = SpaceFieldConfig.asteroidMinMass
     val asteroidMaxMass = SpaceFieldConfig.asteroidMaxMass

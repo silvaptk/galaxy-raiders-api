@@ -6,7 +6,7 @@ import galaxyraiders.core.physics.Vector2D
 class Explosion(
   initialPosition: Point2D,
   radius: Double
-): SpaceObject(
+) : SpaceObject(
   type = "Explosion",
   symbol = '*',
   initialPosition = initialPosition,
@@ -19,7 +19,7 @@ class Explosion(
   val visible: Boolean
     get() = this.visiblity > 0
 
-  fun decreaseVisibility (step: Double = 0.01) {
+  fun decreaseVisibility(step: Double = 0.01) {
     this.visiblity -= step
   }
 }
