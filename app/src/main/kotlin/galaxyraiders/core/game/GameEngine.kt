@@ -88,7 +88,18 @@ class GameEngine(
     this.field.spaceObjects.forEachPair {
         (first, second) ->
       if (first.impacts(second)) {
+        if (first.symbol == '*' || second.symbol == '*') {
+          return@forEachPair
+        }
+
         first.collideWith(second, GameEngineConfig.coefficientRestitution)
+
+        if (
+          first.symbol == '^' && second.symbol == '.' ||
+          first.symbol == '.' && second.symbol == '^'
+        ) {
+          this.field.generateExplosion(first, second)
+        }
       }
     }
   }
@@ -97,11 +108,13 @@ class GameEngine(
     this.field.moveShip()
     this.field.moveAsteroids()
     this.field.moveMissiles()
+    this.field.updateExplosions()
   }
 
   fun trimSpaceObjects() {
     this.field.trimAsteroids()
     this.field.trimMissiles()
+    this.field.trimExplosions()
   }
 
   fun generateAsteroids() {

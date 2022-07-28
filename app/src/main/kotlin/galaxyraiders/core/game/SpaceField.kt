@@ -23,6 +23,9 @@ object SpaceFieldConfig {
   val asteroidMinMass = config.get<Int>("ASTEROID_MIN_MASS")
   val asteroidMaxMass = config.get<Int>("ASTEROID_MAX_MASS")
   val asteroidMassMultiplier = config.get<Double>("ASTEROID_MASS_MULTIPLIER")
+
+  val explosionMinRadius = config.get<Double>("EXPLOSION_MIN_RADIUS")
+  val explosionMaxRadius = config.get<Double>("EXPLOSION_MAX_RADIUS")
 }
 
 @Suppress("TooManyFunctions")
@@ -38,6 +41,9 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
   var asteroids: List<Asteroid> = emptyList()
     private set
 
+  var explosions: List<Explosion> = emptyList()
+    private set
+
   val spaceObjects: List<SpaceObject>
     get() = listOf(this.ship) + this.missiles + this.asteroids
 
@@ -51,6 +57,10 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
 
   fun moveAsteroids() {
     this.asteroids.forEach { it.move() }
+  }
+
+  fun updateExplosions() {
+    this.explosions.forEach { it.decreaseVisibility() }
   }
 
   fun generateMissile() {
@@ -71,6 +81,10 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     this.asteroids = this.asteroids.filter {
       it.inBoundaries(this.boundaryX, this.boundaryY)
     }
+  }
+
+  fun trimExplosions() {
+    this.explosions = this.explosions.filter { it.visible }
   }
 
   private fun initializeShip(): SpaceShip {
@@ -152,5 +166,49 @@ data class SpaceField(val width: Int, val height: Int, val generator: RandomGene
     )
 
     return scaledMass * SpaceFieldConfig.asteroidMassMultiplier
+  }
+
+  fun generateExplosion(firstCollider: SpaceObject, secondCollider: SpaceObject) {
+    this.explosions = this.explosions + Explosion(
+      initialPosition = getExplosionPosition(firstCollider, secondCollider),
+      radius = getExplosionRadius(firstCollider, secondCollider)
+    )
+  }
+
+  private fun getExplosionPosition(
+    firstColider: SpaceObject,
+    secondColider: SpaceObject
+  ): Point2D {
+    val firstCenter = firstColider.center
+    val secondCenter = secondColider.center
+
+    val auxiliaryVector = (
+      secondCenter.toVector() - firstCenter.toVector()
+    ).unit * firstColider.radius
+
+    return firstCenter + auxiliaryVector
+  }
+
+  private fun getExplosionRadius(
+    firstCollider: SpaceObject,
+    secondCollider: SpaceObject
+  ): Double {
+    val delta = (
+      SpaceFieldConfig.explosionMaxRadius - SpaceFieldConfig.explosionMinRadius
+    )
+
+    val asteroidMinMass = SpaceFieldConfig.asteroidMinMass
+    val asteroidMaxMass = SpaceFieldConfig.asteroidMaxMass
+
+    val asteroidMass = if (firstCollider.symbol == '.')
+      firstCollider.mass / SpaceFieldConfig.asteroidMassMultiplier
+    else
+      secondCollider.mass / SpaceFieldConfig.asteroidMassMultiplier
+
+    val factor = (asteroidMass - asteroidMinMass) / (asteroidMaxMass - asteroidMinMass)
+
+    val radius = SpaceFieldConfig.explosionMinRadius + delta * factor
+
+    return radius
   }
 }
